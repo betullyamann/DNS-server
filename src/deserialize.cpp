@@ -1,6 +1,6 @@
 #include "DNSMessage.h"
 
-void DNSHeader::deserialize(DNSBuffer &buffer)
+void DNSHeader::deserialize(DNSReadBuffer &buffer)
 {
     transaction_id = buffer.read_uint16();
     flags = buffer.read_uint16();
@@ -10,43 +10,48 @@ void DNSHeader::deserialize(DNSBuffer &buffer)
     additional_count = buffer.read_uint16();
 }
 
-void DNSQuestion::deserialize(DNSBuffer &buffer)
+void DNSQuestion::deserialize(DNSReadBuffer &buffer)
 {
     domain_name = buffer.read_domain_name();
     qtype = buffer.read_uint16();
     qclass = buffer.read_uint16();
 }
 
-void DNSRecord::deserialize(DNSBuffer &buffer)
+void DNSResource::deserialize(DNSReadBuffer &buffer)
 {
     domain_name = buffer.read_domain_name();
     qtype = buffer.read_uint16();
     qclass = buffer.read_uint16();
-    ttl = buffer.read_uint8();
+    ttl = buffer.read_uint32();
     data_length = buffer.read_uint16();
+    read_resource(buffer);
 }
 
-void DNSMessage::deserialize(DNSBuffer &buffer)
+void DNSMessage::deserialize(DNSReadBuffer &buffer)
 {
     header.deserialize(buffer);
 
-    questions.resize(header.get_question_count());
-    for(auto &question : questions){
+    questions.resize(header.question_count);
+    for (auto &question : questions)
+    {
         question.deserialize(buffer);
     }
 
-    answers.resize(header.get_answer_count());
-    for(auto &answer : answers){
+    answers.resize(header.answer_count);
+    for (auto &answer : answers)
+    {
         answer.deserialize(buffer);
     }
 
-    authorities.resize(header.get_authority_count());
-    for(auto &authority : authorities){
+    authorities.resize(header.authority_count);
+    for (auto &authority : authorities)
+    {
         authority.deserialize(buffer);
     }
 
-    additionals.resize(header.get_additional_count());
-    for(auto &addition : additionals){
+    additionals.resize(header.additional_count);
+    for (auto &addition : additionals)
+    {
         addition.deserialize(buffer);
     }
 }

@@ -5,83 +5,77 @@
 #include <string>
 #include <vector>
 
+class DNSReadBuffer
+{
+public:
+    DNSReadBuffer(const size_t size) : buffer(size), position(0){};
+    DNSReadBuffer(const std::vector<uint8_t> raw_message) : buffer(raw_message.begin(), raw_message.end()), position(0){};
+
+    uint8_t read_uint8();
+    uint16_t read_uint16();
+    uint32_t read_uint32();
+    
+    std::string read_domain_name();
+
+private:
+    std::vector<uint8_t> buffer;
+    size_t position;
+};
+
 class DNSHeader
 {
-private:
+public:
     uint16_t transaction_id;
     uint16_t flags;  
     uint16_t question_count; 
     uint16_t answer_count;
     uint16_t authority_count;
     uint16_t additional_count;
-public:
-    uint16_t get_question_count();
-    uint16_t get_answer_count();
-    uint16_t get_authority_count();
-    uint16_t get_additional_count();
 
-    void serialize(DNSBuffer& buffer) const;
-    void deserialize(DNSBuffer& buffer);
+    void deserialize(DNSReadBuffer& buffer);
 };
 
 class DNSQuestion
 {
-private:
+public:
     std::string domain_name;
     uint16_t qtype;
     uint16_t qclass;
-public:
-    std::string get_domain_name();
     
-    void serialize(DNSBuffer& buffer) const;
-    void deserialize(DNSBuffer& buffer);
+    void deserialize(DNSReadBuffer& buffer);
 };
 
-class DNSRecord
+class DNSResource
 {
 private:
+    void read_IPV4_address(DNSReadBuffer& buffer);
+    void read_IPV6_address(DNSReadBuffer& buffer);
+    void read_CNAME(DNSReadBuffer& buffer);
+    void read_unsupported_resource_types(DNSReadBuffer& buffer);
+    
+    void read_resource(DNSReadBuffer &buffer);
+
+public:
     std::string domain_name;
     uint16_t qtype;
     uint16_t qclass;
     uint32_t ttl;
     uint16_t data_length;
-    //std::vector<unsigned char> rdata;
-public:
-    void serialize(DNSBuffer& buffer) const;
-    void deserialize(DNSBuffer& buffer);
-};
-
-class DNSBuffer
-{
-public:
-    DNSBuffer(size_t size) : buffer(size), position(0){};
-
-    uint8_t read_uint8();
-    uint16_t read_uint16();
-    uint32_t read_uint32();
-    std::string read_domain_name();
-
-    void write_uint8(uint8_t value);
-    void write_uint16(uint16_t value);
-    void write_uint32(uint32_t value);
-    void write_domain_name(const std::string& domain);
-private:
-    std::vector<uint8_t> buffer;
-    size_t position;
+    std::string resource;
+    
+    void deserialize(DNSReadBuffer& buffer);
 };
 
 class DNSMessage
 {
-private:
+public:
     DNSHeader header;
     std::vector<DNSQuestion> questions;
-    std::vector<DNSRecord> answers;
-    std::vector<DNSRecord> authorities;
-    std::vector<DNSRecord> additionals;
-public:    
+    std::vector<DNSResource> answers;
+    std::vector<DNSResource> authorities;
+    std::vector<DNSResource> additionals;
 
-    void serialize(DNSBuffer& buffer) const;
-    void deserialize(DNSBuffer& buffer);
+    void deserialize(DNSReadBuffer& buffer);
 
 };
 

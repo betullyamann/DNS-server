@@ -1,29 +1,7 @@
 #include <DNSMessage.h>
 #include <stdexcept>
 
-// GETTER functions
-uint16_t DNSHeader::get_question_count()
-{
-    return question_count;
-}
-
-uint16_t DNSHeader::get_answer_count()
-{
-    return answer_count;
-}
-
-uint16_t DNSHeader::get_authority_count()
-{
-    return authority_count;
-}
-
-uint16_t DNSHeader::get_additional_count()
-{
-    return additional_count;
-}
-
-// READ functions
-uint8_t DNSBuffer::read_uint8()
+uint8_t DNSReadBuffer::read_uint8()
 {
     if (position < buffer.size())
     {
@@ -31,21 +9,21 @@ uint8_t DNSBuffer::read_uint8()
     }
     else
     {
-        throw std::out_of_range("BUffer overflow");
+        throw std::out_of_range("Buffer overflow");
     }
 }
 
-uint16_t DNSBuffer::read_uint16()
+uint16_t DNSReadBuffer::read_uint16()
 {
     return ((read_uint8() << 8) | read_uint8());
 }
 
-uint32_t DNSBuffer::read_uint32()
+uint32_t DNSReadBuffer::read_uint32()
 {
     return ((read_uint16() << 16) | read_uint16());
 }
 
-std::string DNSBuffer::read_domain_name()
+std::string DNSReadBuffer::read_domain_name()
 {
     std::string domain_name = "";
     size_t current_position;
@@ -65,12 +43,14 @@ std::string DNSBuffer::read_domain_name()
             since the label must begin with two zero bits because
             labels are restricted to 63 octets or less.
             */
-            if (length & 0b11000000 != 0)
+            if ((length & 0b11000000) == 0b11000000)
             {
                 current_position = position;
-                position =  ((length << 8) | read_uint8()) & 0b00111111; // offset from the start of the message
+                position = ((length & 0b00111111) << 8) | read_uint8(); // offset from the start of the message
                 domain_name += read_domain_name();
-                position = current_position;
+                position = current_position + 1;
+                break;
+    
             }
             else
             {
@@ -83,3 +63,4 @@ std::string DNSBuffer::read_domain_name()
 
     return domain_name;
 }
+
