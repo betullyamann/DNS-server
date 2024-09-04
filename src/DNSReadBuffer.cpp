@@ -57,6 +57,7 @@ std::string DNSReadBuffer::read_domain_name()
                 if(!domain_name.empty())
                     domain_name += ".";
                 std::string label(buffer.begin() + position, buffer.begin() + position + length);
+                domain_name += label;
                 position += length;
             }
         }
