@@ -47,6 +47,8 @@ std::string DNSReadBuffer::read_domain_name()
             {
                 current_position = position;
                 position = ((length & 0b00111111) << 8) | read_uint8(); // offset from the start of the message
+                if(!domain_name.empty() && domain_name.back() != '.')
+                    domain_name += ".";
                 domain_name += read_domain_name();
                 position = current_position + 1;
                 break;
