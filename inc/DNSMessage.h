@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 class DNSReadBuffer
 {
@@ -22,6 +23,27 @@ private:
     size_t position;
 };
 
+class DNSWriteBuffer
+{
+public:
+    DNSWriteBuffer() : buffer(0), position(0){};
+
+    void write_uint8(uint8_t value);
+    void write_uint16(uint16_t value);
+    void write_uint32(uint32_t value);
+    void write_string(const std::string& str);
+    void write_domain_name(const std::string& domain);
+    void write_compressed_domain_name(std::uint16_t domain_name_start);
+
+    void create_domain_name_table(const std::string &domain);
+    uint16_t get_previous_occurance(const std::string &domain);
+
+private:
+    std::vector<uint8_t> buffer;
+    std::unordered_map<std::string, std::uint16_t> domain_name_table;
+    size_t position;
+};
+
 class DNSHeader
 {
 public:
@@ -32,6 +54,7 @@ public:
     uint16_t authority_count;
     uint16_t additional_count;
 
+    void serialize(DNSWriteBuffer& buffer) const;
     void deserialize(DNSReadBuffer& buffer);
 };
 
@@ -42,6 +65,7 @@ public:
     uint16_t qtype;
     uint16_t qclass;
     
+    void serialize(DNSWriteBuffer& buffer) const;
     void deserialize(DNSReadBuffer& buffer);
 };
 
@@ -52,8 +76,14 @@ private:
     void read_IPV6_address(DNSReadBuffer& buffer);
     void read_CNAME(DNSReadBuffer& buffer);
     void read_unsupported_resource_types(DNSReadBuffer& buffer);
-    
     void read_resource(DNSReadBuffer &buffer);
+
+    void parse_ip_address(const char delimeter, DNSWriteBuffer& buffer) const;
+    void write_IPV4_address(DNSWriteBuffer& buffer) const;
+    void write_IPV6_address(DNSWriteBuffer& buffer) const;
+    void write_CNAME(DNSWriteBuffer& buffer) const;
+    void write_unsupported_resource_types(DNSWriteBuffer& buffer) const;
+    void write_resource(DNSWriteBuffer &buffer) const;
 
 public:
     std::string domain_name;
@@ -63,6 +93,7 @@ public:
     uint16_t data_length;
     std::string resource;
     
+    void serialize(DNSWriteBuffer& buffer) const;
     void deserialize(DNSReadBuffer& buffer);
 };
 
@@ -75,6 +106,7 @@ public:
     std::vector<DNSResource> authorities;
     std::vector<DNSResource> additionals;
 
+    void serialize(DNSWriteBuffer& buffer) const;
     void deserialize(DNSReadBuffer& buffer);
 
 };

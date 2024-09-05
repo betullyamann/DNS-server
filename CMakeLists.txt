@@ -6,9 +6,11 @@ include_directories("${CMAKE_SOURCE_DIR}/inc")
 # List of source files
 set(SOURCES 
     "src/main.cpp"
-    "src/deserialize.cpp "
-    "src/DNSReadBuffer.cpp "
-    "src/DNSResource.cpp "
+    "src/deserialize.cpp"
+    "src/DNSReadBuffer.cpp"
+    "src/DNSResource.cpp"
+    "src/serialize.cpp"
+    "src/DNSWriteBuffer.cpp"
 )
 
 # Add executable target using globbing to find all source files in src directory
