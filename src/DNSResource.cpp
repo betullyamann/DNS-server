@@ -1,3 +1,5 @@
+
+#include <iomanip>
 #include <sstream>
 #include <string>
 
@@ -33,7 +35,8 @@ void DNSResource::read_unsupported_resource_types(DNSReadBuffer& buffer)
 {
     std::ostringstream hex_string;
     for(size_t i=0; i < data_length; ++i){
-        hex_string << std::hex << buffer.read_uint8();
+        uint8_t v = buffer.read_uint8();
+        hex_string << std::hex << v;
     }
     resource = hex_string.str();
 }

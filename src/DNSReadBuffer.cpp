@@ -68,3 +68,7 @@ std::string DNSReadBuffer::read_domain_name()
     return domain_name;
 }
 
+size_t DNSReadBuffer::get_position() const
+{
+    return position;
+}

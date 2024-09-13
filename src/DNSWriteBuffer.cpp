@@ -81,6 +81,18 @@ uint16_t DNSWriteBuffer::get_previous_occurance(const std::string &domain)
     }
 }
 
+std::vector<uint8_t> DNSWriteBuffer::get_buffer_from(size_t position) const
+{
+    std::vector<uint8_t> slice(buffer.begin() + position, buffer.end());
+    return slice;
+}
+
+size_t DNSWriteBuffer::get_position() const
+{
+    return position;
+}
+
+
 // void split_domain_name(std::vector<std::string>& label_list, std::string domain)
 // {
 //     size_t start = 0, end;   
