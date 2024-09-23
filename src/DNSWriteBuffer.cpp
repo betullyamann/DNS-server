@@ -38,7 +38,7 @@ void DNSWriteBuffer::write_domain_name(const std::string &domain)
         }
         else
         {
-            domain_name_table.insert({domain.substr(start), position});
+            wb_domain_name_table.insert({domain.substr(start), position});
 
             write_uint8(end - start);
             write_string(domain.substr(start, end - start));
@@ -55,7 +55,7 @@ void DNSWriteBuffer::write_domain_name(const std::string &domain)
         }
         else
         {
-            domain_name_table.insert({domain.substr(start), position});
+            wb_domain_name_table.insert({domain.substr(start), position});
 
             write_uint8(domain.size() - start);
             write_string(domain.substr(start));
@@ -71,7 +71,7 @@ void DNSWriteBuffer::write_compressed_domain_name(std::uint16_t domain_name_star
 
 uint16_t DNSWriteBuffer::get_previous_occurance(const std::string &domain)
 {
-    if (auto iterator = domain_name_table.find(domain); iterator != domain_name_table.end())
+    if (auto iterator = wb_domain_name_table.find(domain); iterator != wb_domain_name_table.end())
     {
         return iterator->second;
     }
@@ -113,17 +113,17 @@ size_t DNSWriteBuffer::get_position() const
 //     while ((end = domain.find('.', start)) != std::string::npos)
 //     {
 //         std::string sub_domain = domain.substr(start);
-//         if (domain_name_table.find(sub_domain) == domain_name_table.end())
+//         if (wb_domain_name_table.find(sub_domain) == wb_domain_name_table.end())
 //         {
-//             domain_name_table.insert({sub_domain, offset});
+//             wb_domain_name_table.insert({sub_domain, offset});
 //         }
 //         offset += end - start;
 //         start = end + 1;
 //     }
 
 //     std::string sub_domain = domain.substr(start);
-//     if (domain_name_table.find(sub_domain) == domain_name_table.end())
+//     if (wb_domain_name_table.find(sub_domain) == wb_domain_name_table.end())
 //     {
-//         domain_name_table.insert({sub_domain, offset});
+//         wb_domain_name_table.insert({sub_domain, offset});
 //     }
 // }

@@ -10,25 +10,29 @@
 class DNSReadBuffer
 {
 public:
-    DNSReadBuffer(const size_t size) : buffer(size), position(0) {};
-    DNSReadBuffer(const std::vector<uint8_t> raw_message) : buffer(raw_message.begin(), raw_message.end()), position(0) {};
+    DNSReadBuffer(const size_t size) : buffer(size), position(0), rb_domain_name_table{} {}
+    DNSReadBuffer(const std::vector<uint8_t>& raw_message) : buffer(raw_message.begin(), raw_message.end()), position(0) {}
 
     uint8_t read_uint8();
     uint16_t read_uint16();
     uint32_t read_uint32();
 
     std::string read_domain_name();
+    void fill_domain_name_table(const std::string& domain_name, std::vector<size_t>& domain_names_offsets);
+
 
     size_t get_position() const;
+    uint8_t get_current_value() const;
 private:
     std::vector<uint8_t> buffer;
     size_t position;
+    std::unordered_map<size_t, std::string> rb_domain_name_table;
 };
 
 class DNSWriteBuffer
 {
 public:
-    DNSWriteBuffer() : buffer(0), position(0) {};
+    DNSWriteBuffer() : buffer(0), position(0) {}
 
     void write_uint8(uint8_t value);
     void write_uint16(uint16_t value);
@@ -45,7 +49,7 @@ public:
 
 private:
     std::vector<uint8_t> buffer;
-    std::unordered_map<std::string, std::uint16_t> domain_name_table;
+    std::unordered_map<std::string, std::uint16_t> wb_domain_name_table;
     size_t position;
 };
 
@@ -83,7 +87,6 @@ private:
     void read_unsupported_resource_types(DNSReadBuffer &buffer);
     void read_resource(DNSReadBuffer &buffer);
 
-    void parse_ip_address(const char delimeter, DNSWriteBuffer &buffer) const;
     void write_IPV4_address(DNSWriteBuffer &buffer) const;
     void write_IPV6_address(DNSWriteBuffer &buffer) const;
     void write_CNAME(DNSWriteBuffer &buffer) const;
